@@ -1,0 +1,82 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{--bg:#fff;--fg:#111827;--mut:#6b7280;--bd:#d1d5db;--acc:#f98012;--chip:#f3f4f6}
+  @media (prefers-color-scheme:dark){:root{--bg:#111827;--fg:#f3f4f6;--mut:#9ca3af;--bd:#374151;--chip:#1f2937}}
+  body{width:360px;font:13px system-ui,sans-serif;padding:12px;margin:0;background:var(--bg);color:var(--fg)}
+  h1{font-size:15px;margin:0 0 2px;display:flex;align-items:center;gap:6px}
+  h1 img{width:18px}
+  #host{color:var(--mut);font-size:11px;margin-bottom:6px}
+  #msg{margin:4px 0}
+  input[type=text],input[type=number]{background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:4px;padding:4px}
+  #list{max-height:180px;overflow:auto;border:1px solid var(--bd);border-radius:6px;padding:4px;margin:6px 0}
+  #list label{display:flex;gap:4px;padding:2px 0;align-items:baseline}
+  #list .n{flex:1}
+  #list small{color:var(--mut);white-space:nowrap}
+  fieldset{border:1px solid var(--bd);border-radius:6px;margin:6px 0;padding:4px 8px}
+  legend{font-size:11px;color:var(--mut)}
+  fieldset label{display:inline-block;margin-right:8px}
+  button{padding:5px 9px;border:1px solid var(--bd);border-radius:4px;background:var(--chip);color:var(--fg);cursor:pointer}
+  button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+  #go{width:100%;padding:9px;background:var(--acc);color:#fff;border:0;font-weight:600;margin-top:4px}
+  #track{height:10px;background:var(--bd);border-radius:5px;overflow:hidden;margin:8px 0}
+  #bar{height:100%;width:0;background:var(--acc);transition:width .2s}
+  .row{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  #q{flex:1;min-width:120px}
+  small,.mut{color:var(--mut)}
+  a{color:var(--acc)}
+</style>
+<h1><img src="icons/icon48.png" alt="">Course Downloader for Moodle™</h1>
+<div id="host"></div>
+<div id="msg"></div>
+<div id="setup" hidden>
+  <div class="row">
+    <button data-f="">Tous</button><button data-f="inprogress">En cours</button><button data-f="past">Passés</button><button data-f="future">Futurs</button>
+    <button id="here" hidden>Ce cours</button>
+  </div>
+  <div class="row" style="margin-top:4px"><input type="text" id="q" placeholder="Rechercher un cours…"><button id="all">✓ tout</button><button id="none">✗</button></div>
+  <div id="list"></div>
+  <div class="mut" id="count"></div>
+  <fieldset><legend>Types de fichiers</legend>
+    <label><input type="checkbox" data-t="docs"> Documents</label>
+    <label><input type="checkbox" data-t="images"> Images</label>
+    <label><input type="checkbox" data-t="media"> Audio/vidéo</label>
+    <label><input type="checkbox" data-t="archives"> Archives</label>
+    <label><input type="checkbox" data-t="other"> Autres</label>
+  </fieldset>
+  <fieldset><legend>Contenus</legend>
+    <label><input type="checkbox" id="pages"> Pages &amp; livres (HTML)</label>
+    <label><input type="checkbox" id="pageFiles"> + leurs fichiers</label><br>
+    <label><input type="checkbox" id="assign"> Devoirs (consignes, rendus, retours)</label><br>
+    <label><input type="checkbox" id="index"> index.html hors-ligne par cours</label>
+  </fieldset>
+  <fieldset><legend>Destination</legend>
+    <label><input type="radio" name="dest" value="folder"> Dossier de mon choix <b>— aucune confirmation</b></label><br>
+    <span style="margin-left:20px" id="dirName" class="mut"></span> <a href="#" id="pickDir">choisir…</a><br>
+    <label><input type="radio" name="dest" value="downloads"> Téléchargements Chrome</label>
+  </fieldset>
+  <fieldset><legend>Options</legend>
+    <label><input type="checkbox" id="number"> Numéroter les sections</label>
+    <label><input type="checkbox" id="force"> Tout re-télécharger</label><br>
+    <label>Parallèle <input type="number" id="parallel" min="1" max="8" style="width:40px"></label><br>
+    <label style="display:flex;gap:4px;align-items:center;margin-top:4px">Sous-dossier <input type="text" id="root" style="flex:1"></label>
+    <small id="rootHint"></small>
+  </fieldset>
+  <button id="go">Télécharger</button>
+  <p><small>Seul ce qui a changé est téléchargé, y compris les fichiers supprimés de ton dossier. <a href="#" id="clr">Vider l'historique</a> · <a href="#" id="settings2">Réglages de téléchargement Chrome</a></small></p>
+</div>
+<div id="warn" hidden style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:6px;padding:6px 8px;margin:6px 0">
+  ⚠️ Chrome demande où enregistrer chaque fichier. Désactive « Demander où enregistrer chaque fichier avant de le télécharger ».
+  <button id="settings" style="margin-top:4px">Ouvrir le réglage Chrome</button>
+</div>
+<div id="run" hidden>
+  <div id="phase"></div>
+  <div id="track"><div id="bar"></div></div>
+  <div id="stats"></div>
+  <p class="row">
+    <button id="pause">Pause</button><button id="retry" hidden>Réessayer les échecs</button>
+    <button id="cancel">Annuler</button><button id="open">Ouvrir le dossier</button>
+  </p>
+</div>
+<script src="idb.js"></script>
+<script src="popup.js"></script>
